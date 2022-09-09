@@ -1,0 +1,82 @@
+### 添加用户信息
+POST http://localhost:8080/user
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "刘德财",
+  "salary": "1000.00",
+  "birthday": "1993-10-01"
+}
+
+> {%
+client.test('正常响应', function (){
+    client.assert(200 === response.status, '响应状态码不是200')
+})
+
+client.global.set("user_id", response.body.id)
+%}
+
+
+### 更新用户信息
+PUT http://localhost:8080/user
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "{{user_id}}",
+  "username": "Tom",
+  "salary": "2000.00",
+  "birthday": "1994-10-01"
+}
+
+> {%
+client.test('检查响应状态码是否200', function (){
+    client.assert(200 === response.status, '响应状态码应该是200')
+})
+
+client.test('检查更新后的信息是否正确',function (){
+    client.assert('Tom' === response.body.username,'更新后的用户名应该是Tom')
+})
+%}
+
+
+### 查询用户详情
+GET http://localhost:8080/user/{{user_id}}
+Accept: application/json
+
+> {%
+client.test('检查响应状态码是否200', function (){
+    client.assert(200 === response.status, '响应状态码应该是200')
+})
+
+client.test('检查用户名是否正确',function (){
+    client.assert('Tom' === response.body.username,'用户名应该是Tom')
+})
+%}
+
+### 查询用户列表
+GET http://localhost:8080/user
+Accept: application/json
+
+username=Tom&pageNo=1&pageSize=20
+
+> {%
+client.test('检查响应状态码是否200', function (){
+    client.assert(200 === response.status, '响应状态码应该是200')
+})
+
+client.test('应该存在分页信息',function (){
+    client.assert(response.body.totalElements > 0,'用户个数应该大于0')
+})
+%}
+
+
+### 删除用户信息
+DELETE http://localhost:8080/user/{{user_id}}
+
+> {%
+client.test('检查提示信息是否正确', function (){
+    client.assert('删除成功' === response.body, '提示信息与期望不符')
+})
+ %}
